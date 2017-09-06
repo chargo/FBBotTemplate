@@ -20,6 +20,7 @@ import (
 )
 
 var mess = &Messenger{}
+var latestReply string = ""
 
 func main() {
 	port := os.Getenv("PORT")
@@ -29,6 +30,7 @@ func main() {
 	log.Println("Bot start in token:", mess.VerifyToken)
 	mess.MessageReceived = MessageReceived
 	http.HandleFunc("/webhook", mess.Handler)
+	http.HandleFunc("/getState", getParamHandler)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
@@ -44,5 +46,10 @@ func MessageReceived(event Event, opts MessageOpts, msg ReceivedMessage) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	latestReply = msg.Text
 	fmt.Printf("%+v", resp)
+}
+
+func getParamHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "latestReply: " + latestReply)
 }
